@@ -1,5 +1,6 @@
 #include <grafo.h>
 /* Alteracao para commit teste*/
+/* Alterando de novo*/
 void CreateFree(Free *f){
     f->first = (Pointer) malloc(sizeof(FreeCell));
     f->last = f->first;
