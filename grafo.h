@@ -80,19 +80,19 @@ typedef struct {
 void CreateFree(Free *f);
 void CreateFreeList(FreeList *fl, int nvertices);
 short IsEmpty(Free f);
-void InsertFree(int color, Free *f, TableCell *tcell);
+void InsertFreeIntern(int color, Free *f, TableCell *tcell);
 void InsertFree(int v, int color, FreeList *fl, TableCell *tcell);
-int RemoveFree(Free *f, Pointer p, int *color, TableCell *tcell);
-void RemoveFree(FreeList *fl, int v, Pointer p, int *color, TableCell *tcell);
+short RemoveFreeIntern(Free *f, Pointer p, int *color, TableCell *tcell);
+short RemoveFree(FreeList *fl, int v, Pointer p, int *color, TableCell *tcell);
 
 void CreateEdgeList(EdgeList *elist, int nedges);
 void AddEdge(int v, int w, int color, EdgeList *elist);
 Edge GetEdge(int v, int w, EdgeList elist);
 
-void CreateTable(Table *table, int nvertices, ncolors);
+void CreateTable(Table *table, int nvertices, int ncolors);
 
 void CreateAdjMatrix(AdjMatrixGraph *graph, int nvertices);
-void InitWithAdjMatrix(AdjListGraph *graph, EdgeList *edge_list, FreeList *free_list, Table *table);
+void InitWithAdjMatrix(AdjMatrixGraph *graph, EdgeList *edge_list, FreeList *free_list, Table *table);
 
 
 #endif

@@ -1,4 +1,4 @@
-#include <grafo.h>
+#include "grafo.h"
 
 void CreateFree(Free *f){
     f->first = (Pointer) malloc(sizeof(FreeCell));
@@ -11,15 +11,15 @@ void CreateFreeList(FreeList *fl, int nvertices){
     fl->size = nvertices;
     fl->f = (Free *) malloc (fl->size*sizeof(Free));
     for (i = 0; i < fl->size; i++){
-        CreateFree(*fl->f[i]);
+        CreateFree(&fl->f[i]);
     }
 }
 
 short IsEmpty(Free f){
-    return (f->first == f->last);
+    return (f.first == f.last);
 }
 
-void InsertFree(int color, Free *f, TableCell *tcell){
+void InsertFreeIntern(int color, Free *f, TableCell *tcell){
     tcell->cPointer = f->last;
     f->last->next = (Pointer) malloc(sizeof(FreeCell));
     f->last = f->last->next;
@@ -28,12 +28,12 @@ void InsertFree(int color, Free *f, TableCell *tcell){
 }
 
 void InsertFree(int v, int color, FreeList *fl, TableCell *tcell){
-    InsertFree(color, fl[v], tcell);
+    InsertFreeIntern(color, &fl->f[v], tcell);
 }
 
-int RemoveFree(Free *f, Pointer p, int *color, TableCell *tcell){
+short RemoveFreeIntern(Free *f, Pointer p, int *color, TableCell *tcell){
     Pointer nextP;
-    if (IsEmpty(*f) || p == NULL || p.next == NULL){
+    if (IsEmpty(*f) || p == NULL || p->next == NULL){
         printf("\nErro: Lista vazia ou posicao inexistente");
         return -1;
     }
@@ -43,15 +43,18 @@ int RemoveFree(Free *f, Pointer p, int *color, TableCell *tcell){
     if (p->next == NULL)
         f->last = p;
     free(nextP);
+
+    tcell->cPointer = NULL;
+    return 1;
 }
 
-void RemoveFree(FreeList *fl, int v, Pointer p, int *color, TableCell *tcell){
-    RemoveFree(fl->f[v], p, color, tcell);
+short RemoveFree(FreeList *fl, int v, Pointer p, int *color, TableCell *tcell){
+    return RemoveFreeIntern(&fl->f[v], p, color, tcell);
 }
 
-void CreateEdgeList(EdgeList *elist, int nedges)
+void CreateEdgeList(EdgeList *elist, int nedges){
+    elist->edge = (Edge *) malloc(nedges*sizeof(Edge));
     elist->size = 0;
-    elist->edge = (Edge) malloc(elist->size*sizeof(Edge));
 }
 
 void AddEdge(int v, int w, int color, EdgeList *elist){
@@ -69,7 +72,7 @@ void CreateTableCell(TableCell *tcell){
     tcell->cPointer = NULL;    
 }
 
-void CreateTable(Table *table, int nvertices, ncolors){
+void CreateTable(Table *table, int nvertices, int ncolors){
     int i, j;
     table->sizeX = nvertices;
     table->sizeY = ncolors;
@@ -86,7 +89,7 @@ void CreateTable(Table *table, int nvertices, ncolors){
     }    
 }
 
-void CreateAdjMatrix(AdjListGraph *graph, int nvertices){
+void CreateAdjMatrix(AdjMatrixGraph *graph, int nvertices){
     int i;
     
     graph->n = nvertices;
@@ -96,7 +99,7 @@ void CreateAdjMatrix(AdjListGraph *graph, int nvertices){
     }
 }
 
-void InitWithAdjMatrix(AdjListGraph *graph, EdgeList *edge_list, FreeList *free_list, Table *table){
+void InitWithAdjMatrix(AdjMatrixGraph *graph, EdgeList *edge_list, FreeList *free_list, Table *table){
     int i, j;
     CreateFreeList(free_list, graph->n);
     CreateEdgeList(edge_list, graph->m);
@@ -107,7 +110,7 @@ void InitWithAdjMatrix(AdjListGraph *graph, EdgeList *edge_list, FreeList *free_
             }
         }
     }
-    CreateTable(table, n, graph->delta);
+    CreateTable(table, graph->n, graph->delta);
     for (i = 0; i < table->sizeX; i++){
         for (j = 0; j < table->sizeY; j++){
             table->matrix[i][j].status = FALSE;
