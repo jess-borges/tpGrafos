@@ -34,8 +34,8 @@ void coloring (EdgeList *edge_list, FreeList *free_list, Table *table){
                     color2 = GetFreeColorNotTaboo(e0.w, *free_list, taboo);
                 }
                 path = TwoColorsPath(e0.v, color1, color2, *edge_list, *table);
-                if (EndsInW(e.w, path, *edge_list)) { /* P (color1, color2) começando em v0 nao termina em w */
-                    InvertPathColors(color1, color2, path free_list, edge_list, table);
+                if (EndsInW(e.w, path, *edge_list)) {
+                    InvertPathColors(color1, color2, path, free_list, edge_list, table);
                     coloringEdge(color2, edge0, edge_list, free_list, table);
                     taboo = NULO;
                 }

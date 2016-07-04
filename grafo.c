@@ -21,7 +21,7 @@ short IsEmpty(Free f){
     return (f.first == f.last);
 }
 
-void InsertFreeIntern(int color, Free *f, TableCell *tcell){    
+void InsertFreeIntern(int color, Free *f, TableCell *tcell){
     tcell->status = FALSE;
     tcell->cPointer = f->last;
 
@@ -53,16 +53,14 @@ short RemoveFreeIntern(Free *f, int *color, Pointer p, TableCell *tcell){
     return 1;
 }
 
-short RemoveFree(FreeList *fl, int v, int *color, Pointer p, Table *tcell){
-    return RemoveFreeIntern(&fl->f[v], p, color, tcell);
+short RemoveFree(FreeList *fl, int v, int *color, Pointer p, TableCell *tcell){
+    return RemoveFreeIntern(&fl->f[v], color, p, tcell);
 }
 
 int RemoveFreeByColor(FreeList *fl, int v, int color, Table *table){
-    Pointer prev, p;
-    Free f;
     TableCell *tcell;
 
-    if (IsFreeColor(v, color, *fl)){}
+    if (IsFreeColor(v, color, *fl)){
         tcell = &table->matrix[v][color];
         RemoveFreeIntern(&fl->f[v], &color, tcell->cPointer, tcell);
     }
@@ -108,7 +106,7 @@ int GetFreeColor(int v, FreeList free_list){
 
     f = free_list.f[v];
     if (!IsEmpty(f)){
-        return f->first->next->color;
+        return f.first->next->color;
     }
     else{
         return NULO;
@@ -126,7 +124,7 @@ int GetFreeColorNotTaboo(int v, FreeList free_list, int taboo){
     p = f.first->next;
     while (p != NULL){
         if (p->color != taboo)
-            return color;
+            return p->color;
         p = p->next;
     }
     return NULO;
@@ -147,18 +145,6 @@ void AddEdge(int v, int w, int color, EdgeList *elist){
     elist->size++;
 }
 
-Edge GetEdge(int v, int w, EdgeList elist){
-    index = GetIndexOfEdge(v, w, elist);
-    return elist.edge(index);
-}
-
-int GetOtherVertex(int v, Edge edge){
-    if (edge.v == v)
-        return edge.w;
-    else
-        return edge.v;
-}
-
 int GetIndexOfEdge(int v, int w, EdgeList elist){
     int i; 
     for (i = 0; i < elist.size; i++){
@@ -166,10 +152,23 @@ int GetIndexOfEdge(int v, int w, EdgeList elist){
             return i; 
         }
         if ((elist.edge[i].v == w) && (elist.edge[i].w == v)){
-            return i
+            return i;
         }
     }
     return -1;
+}
+
+Edge GetEdge(int v, int w, EdgeList elist){
+    int index;
+    index = GetIndexOfEdge(v, w, elist);
+    return elist.edge[index];
+}
+
+int GetOtherVertex(int v, Edge edge){
+    if (edge.v == v)
+        return edge.w;
+    else
+        return edge.v;
 }
 
 int GetColorOfEdge(int v, int w, EdgeList elist){
@@ -182,6 +181,7 @@ int GetColorOfEdge(int v, int w, EdgeList elist){
 }
 
 Edge GetColorlessEdge(EdgeList elist){
+    int index; 
     index = GetIndexOfColorlessEdge(elist);
     return elist.edge(index);
 }
@@ -189,11 +189,11 @@ Edge GetColorlessEdge(EdgeList elist){
 int GetIndexOfColorlessEdge(EdgeList elist){
     int i; 
     for (i = 0; i < elist.size; i++){
-        if (elist.edge[i].color = -1){
+        if (elist.edge[i].color == -1){
             return i;
         }
     }
-    return NULL;
+    return NULO;
 }
 
 Edge IsTottalyColored(EdgeList elist){
@@ -218,7 +218,7 @@ void CreatePath(Path *path){
 }
 
 void AddEdgeToPath(int iEdge, Path *path){
-    if (size >= path->allocated*ALLOC_BLOCK){
+    if (path->size >= path->allocated*ALLOC_BLOCK){
         path->allocated++;
         path->iEdges = (int *)realloc(path, path->allocated*ALLOC_BLOCK*sizeof(int));
     }
@@ -228,24 +228,28 @@ void AddEdgeToPath(int iEdge, Path *path){
 
 Path TwoColorsPath(int v, int color1, int color2, EdgeList edge_list, Table table){
     Edge edge;
+    int iEdge;
     Path path;
     short endOfPath;
 
     path = NULL;
     endOfPath = FALSE;
-    edge = table.matrix[v][color2].adj;
+    iEdge = table.matrix[v][color2].adj;
+    edge = edge_list.edge[iEdge];
     if (edge != NULL){
-        AddEdgeToPath(edge, &path);
+        AddEdgeToPath(iEdge, &path);
         v = GetOtherVertex(v, edge);
     }
     while (!endOfPath){
         if (table.matrix[v][color1].status){
-            edge = table.matrix[v][color1].adj;
-            AddEdgeToPath(edge, &path);
+            iEdge = table.matrix[v][color1].adj;
+            edge = edge_list.edge[iEdge];
+            AddEdgeToPath(iEdge, &path);
             v = GetOtherVertex(v, edge);
             if (table.matrix[v][color2].status){
-                edge = table.matrix[v][color2].adj;
-                AddEdgeToPath(edge, &path);
+                iEdge = table.matrix[v][color2].adj;
+                edge = edge_list.edge[iEdge];
+                AddEdgeToPath(iEdge, &path);
                 v = GetOtherVertex(v, edge);
             }
             else{
