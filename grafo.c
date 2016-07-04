@@ -62,8 +62,10 @@ int RemoveFreeByColor(FreeList *fl, int v, int color, Table *table){
     Free f;
     TableCell *tcell;
 
-    tcell = &table->matrix[v][color];
-    RemoveFreeIntern(&fl->f[v], &color, tcell->cPointer, tcell);
+    if (IsFreeColor(v, color, *fl)){}
+        tcell = &table->matrix[v][color];
+        RemoveFreeIntern(&fl->f[v], &color, tcell->cPointer, tcell);
+    }
 }
 
 short IsFreeColor(int v, int color, FreeList free_list){
@@ -261,6 +263,55 @@ short EndsInW(int w, Path path, EdgeList edge_list){
     iEdge = path.iEdges[size - 1];
     vertex = edge_list.edge[iEdge].w;
     return (vertex == w);
+}
+
+void InvertPathColors(int color1, int color2, Path path, FreeList *free_list, EdgeList *edge_list, Table *table){
+    Edge edge;
+    int i, color;
+    
+    if (path.size == 0){
+        printf("\nCaminho vazio");
+        return;
+    }
+
+    /* Garante que as cores possam ser enviadas por parametro em qualquer ordem */
+    edge = edge_list.edge[path.iEdges[0]];
+    if (color1 != edge.color){
+        color = color1;
+        color1 = edge.color;
+        color2 = color;
+    }
+    if (path.size > 1){
+        edge = edge_list.edge[path.iEdges[1]];
+        color2 = edge.color;
+    }
+
+    for (i = 0; i < path.size; i++){
+        edge = edge_list.edge[path.iEdges[i]];
+        if (i%2 == 0){
+            /* Atualiza no EdgeList */
+            edge_list.edge[path.iEdges[i]].color = color2;
+            /* Atualiza no FreeList */
+            RemoveFreeByColor(free_list, edge.v, color2, table);
+            RemoveFreeByColor(free_list, edge.w, color2, table);
+            InsertFree(edge.v, color1, free_list, table);
+            InsertFree(edge.w, color1, free_list, table);
+            /* Atualiza no Table */
+            UpdateInTable(edge.v, edge.w, color2, path.iEdges[i], table);
+
+        }
+        else{
+            edge_list.edge[path.iEdges[i]].color = color1;
+            /* Atualiza no FreeList */
+            RemoveFreeByColor(free_list, edge.v, color1, table);
+            RemoveFreeByColor(free_list, edge.w, color1, table);
+            InsertFree(edge.v, color2, free_list, table);
+            InsertFree(edge.w, color2, free_list, table);
+            /* Atualiza no Table */
+            UpdateInTable(edge.v, edge.w, color1, path.iEdges[i], table);
+        }
+        
+    }
 }
 
 /****************** Operações de Table ******************/

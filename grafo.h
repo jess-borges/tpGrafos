@@ -87,7 +87,7 @@ void CreateFree(Free *f);
 void CreateFreeList(FreeList *fl, int nvertices);
 short IsEmpty(Free f);
 void InsertFreeIntern(int color, Free *f, TableCell *tcell);
-void InsertFree(int v, int color, FreeList *fl, TableCell *tcell);
+void InsertFree(int v, int color, FreeList *fl, Table *table);
 short RemoveFreeIntern(Free *f, int *color, Pointer p, TableCell *tcell);
 short RemoveFree(FreeList *fl, int v, int *color, Pointer p, TableCell *tcell);
 int RemoveFreeByColor(FreeList *fl, int v, int color, Table *table);
@@ -109,6 +109,7 @@ void CreatePath(Path *path);
 void AddEdgeToPath(int iEdge, Path *path);
 Path TwoColorsPath(int v, int color1, int color2, EdgeList edge_list, Table table);
 short EndsInW(int w, Path path, EdgeList edge_list);
+void InvertPathColors(Path path, FreeList *free_list, EdgeList *edge_list, Table *table);
 
 void CreateTableCell(TableCell *tcell);
 void CreateTable(Table *table, int nvertices, int ncolors);
