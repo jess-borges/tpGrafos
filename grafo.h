@@ -82,17 +82,30 @@ void CreateFreeList(FreeList *fl, int nvertices);
 short IsEmpty(Free f);
 void InsertFreeIntern(int color, Free *f, TableCell *tcell);
 void InsertFree(int v, int color, FreeList *fl, TableCell *tcell);
-short RemoveFreeIntern(Free *f, Pointer p, int *color, TableCell *tcell);
-short RemoveFree(FreeList *fl, int v, Pointer p, int *color, TableCell *tcell);
+short RemoveFreeIntern(Free *f, int *color, Pointer p, TableCell *tcell);
+short RemoveFree(FreeList *fl, int v, int *color, Pointer p, TableCell *tcell);
+int RemoveFreeByColor(FreeList *fl, int v, int color, Table *table);
+short IsFreeColor(int v, int color, FreeList free_list);
+int GetCommonFreeColor(Edge edge, FreeList free_list);
+int GetFreeColor(int v, FreeList free_list);
+int GetFreeColorNotTaboo(int v, FreeList free_list, int taboo)
 
 void CreateEdgeList(EdgeList *elist, int nedges);
 void AddEdge(int v, int w, int color, EdgeList *elist);
 Edge GetEdge(int v, int w, EdgeList elist);
+int GetIndexOfEdge(int v, int w, EdgeList elist);
+int GetColorOfEdge(int v, int w, EdgeList elist);
+int GetIndexOfColorlessEdge(EdgeList elist);
+Edge GetColorlessEdge(EdgeList elist);
+Edge IsTottalyColored(EdgeList elist);
 
+void CreateTableCell(TableCell *tcell);
 void CreateTable(Table *table, int nvertices, int ncolors);
+void UpdateInTable(int v, int w, int color, int iEdge, Table *table);
 
 void CreateAdjMatrix(AdjMatrixGraph *graph, int nvertices);
 void InitWithAdjMatrix(AdjMatrixGraph *graph, EdgeList *edge_list, FreeList *free_list, Table *table);
+
 
 
 #endif
