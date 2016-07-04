@@ -72,8 +72,10 @@ void CreateTableCell(TableCell *tcell){
     tcell->cPointer = NULL;    
 }
 
-void CreateTable(Table *table, int nvertices, int ncolors){
+void CreateTable(Table *table, int nvertices, int delta){
     int i, j;
+    int ncolors;
+    ncolors = delta + 1;
     table->sizeX = nvertices;
     table->sizeY = ncolors;
 
@@ -104,7 +106,9 @@ void InitWithAdjMatrix(AdjMatrixGraph *graph, EdgeList *edge_list, FreeList *fre
     CreateFreeList(free_list, graph->n);
     CreateEdgeList(edge_list, graph->m);
     for (i = 0; i < graph->n; i++){
-        for (j = 0; j < i; j++){
+        for (j = 0; j < i; j++){ 
+        /* Adiciona arestas apenas uma vez. 
+        Para adicionar duas basta colocar j < graph->n */
             if (graph->matrix[i][j] == 1){
                 AddEdge(i, j, NULO, edge_list); /* Adciona aresta descolorida ao EdgeList */
             }

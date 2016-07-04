@@ -11,22 +11,34 @@ int readInt(FILE **file, int *n){
 
 void readAdjMatrix(char *file_name, AdjMatrixGraph *graph){
     int i, j, num;
-    int degree;
+    int degree, nedges;
     FILE *file;
+
 
     file = fopen(file_name, "r");
     if (!file){
-        printf("\nHouve um problema com o arquivo");
+        printf("\nHouve um problema com o arquivo [%s]", file_name);
         exit(0);
     }
+
+    num = 0;
+    nedges = 0;
     readInt(&file, &graph->n);
-    readInt(&file, &graph->m);
+    printf ("n = %d\n", graph->n);
+
+    CreateAdjMatrix(graph, graph->n);
     for (i = 0; i < graph->n; i++){
-        for (j = 0; j < graph->m; j++){
+        for (j = 0; j < graph->n; j++){
             readInt(&file, &num);
+            printf ("%d  ", num);
+            nedges += num;
             graph->matrix[i][j] = num;
         }
+        printf("\n");
     }
+    
+    graph->m = nedges/2;
+    printf ("\nm = %d\n", graph->m);
 
     graph->delta = 0; /* maximo grau do grafo */
     for (i = 0; i < graph->n; i++){
@@ -40,12 +52,12 @@ void readAdjMatrix(char *file_name, AdjMatrixGraph *graph){
     }
 }
 
-void printGraph(AdjMatrixGraph graph){
+void printAdjMatrixGraph(AdjMatrixGraph graph){
     int i, j;
-    printf("%d x %d [delta = %d]", graph->n, graph->m, graph->delta);
-    for (i = 0; i < graph->n; i++){
-        for (j = 0; j < graph->n; j++){
-        printf("%d ", graph->matrix[i][j])
+    printf("%d x %d [delta = %d]\n", graph.n, graph.m, graph.delta);
+    for (i = 0; i < graph.n; i++){
+        for (j = 0; j < graph.n; j++){
+        printf("%d ", graph.matrix[i][j]);
         }
         printf("\n");
     }
@@ -56,15 +68,15 @@ void printGraph(EdgeList edge_list, FreeList free_list, Table table){
     Pointer p;
     printf("\nEdge List: ");
     for (i = 0; i < edge_list.size; i++){
-        printf("\n(%d, %d): %d", edge_list[i].v, edge_list[i].w, edge_list[i].color);
+        printf("\n(%d, %d): %d", edge_list.edge[i].v, edge_list.edge[i].w, edge_list.edge[i].color);
     }
 
     printf("\nFree List: ");
     for (i = 0; i < free_list.size; i++){
         printf("\nVertex %d: ", i);
-        if (!IsEmpty(free_list[i])){
-            p = free_list[i].first;
-            while (p != free_list[i].last){
+        if (!IsEmpty(free_list.f[i])){
+            p = free_list.f[i].first;
+            while (p != free_list.f[i].last){
                 printf("%d ", p->color);
                 p = p->next;
             }
@@ -74,7 +86,7 @@ void printGraph(EdgeList edge_list, FreeList free_list, Table table){
     printf("\nTable (%d, %d):", table.sizeX, table.sizeY);
     for (i = 0; i < table.sizeX; i++){
         for (j = 0; j < table.sizeY; j++){
-            printf("\n(v = %d, c = %d) status = %d | adj = %d", table[i][j].status, table[i][j].adj);
+            printf("\n(v = %d, c = %d) status = %d | adj = %d", i, j, table.matrix[i][j].status, table.matrix[i][j].adj);
         }
     }    
 }
