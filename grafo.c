@@ -120,7 +120,7 @@ int GetFreeColorNotTaboo(int v, FreeList free_list, int taboo){
     f = free_list.f[v];
     if (IsEmpty(f))
         return FALSE;
-    
+
     p = f.first->next;
     while (p != NULL){
         if (p->color != taboo)
@@ -148,6 +148,13 @@ void AddEdge(int v, int w, int color, EdgeList *elist){
 Edge GetEdge(int v, int w, EdgeList elist){
     index = GetIndexOfEdge(v, w, elist);
     return elist.edge(index);
+}
+
+int GetOtherVertex(int v, Edge edge){
+    if (edge.v == v)
+        return edge.w;
+    else
+        return edge.v;
 }
 
 int GetIndexOfEdge(int v, int w, EdgeList elist){
@@ -201,6 +208,60 @@ void coloringEdge(int color, int iEdge, EdgeList *edge_list, FreeList *free_list
     UpdateInTable(edge.v, edge.w, edge.color, iEdge, table);    
 }
 
+/****************** Operações de Path ******************/
+void CreatePath(Path *path){
+    path->allocated = 1;
+    path->size = 0;
+    path->iEdges = (int *)malloc (path->allocated*ALLOC_BLOCK*sizeof(int));
+}
+
+void AddEdgeToPath(int iEdge, Path *path){
+    if (size >= path->allocated*ALLOC_BLOCK){
+        path->allocated++;
+        path->iEdges = (int *)realloc(path, path->allocated*ALLOC_BLOCK*sizeof(int));
+    }
+    path->iEdges[path->size] = iEdge;
+    path->size++;
+}
+
+Path TwoColorsPath(int v, int color1, int color2, EdgeList edge_list, Table table){
+    Edge edge;
+    Path path;
+    short endOfPath;
+
+    path = NULL;
+    endOfPath = FALSE;
+    edge = table.matrix[v][color2].adj;
+    if (edge != NULL){
+        AddEdgeToPath(edge, &path);
+        v = GetOtherVertex(v, edge);
+    }
+    while (!endOfPath){
+        if (table.matrix[v][color1].status){
+            edge = table.matrix[v][color1].adj;
+            AddEdgeToPath(edge, &path);
+            v = GetOtherVertex(v, edge);
+            if (table.matrix[v][color2].status){
+                edge = table.matrix[v][color2].adj;
+                AddEdgeToPath(edge, &path);
+                v = GetOtherVertex(v, edge);
+            }
+            else{
+                endOfPath = TRUE;
+            }
+        }
+        else{
+            endOfPath = TRUE;
+        }
+    }
+}
+
+short EndsInW(int w, Path path, EdgeList edge_list){
+    int vertex, iEdge;
+    iEdge = path.iEdges[size - 1];
+    vertex = edge_list.edge[iEdge].w;
+    return (vertex == w);
+}
 
 /****************** Operações de Table ******************/
 void CreateTableCell(TableCell *tcell){

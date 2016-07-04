@@ -41,6 +41,12 @@ typedef struct{
     int size;
 } EdgeList;
 
+typedf struct{
+    int *iEdges;
+    int size;
+    int allocated;
+} Path;
+
 typedef struct FreeCell_struct *Pointer;
 
 typedef struct FreeCell_struct{
@@ -98,6 +104,11 @@ int GetColorOfEdge(int v, int w, EdgeList elist);
 int GetIndexOfColorlessEdge(EdgeList elist);
 Edge GetColorlessEdge(EdgeList elist);
 Edge IsTottalyColored(EdgeList elist);
+
+void CreatePath(Path *path);
+void AddEdgeToPath(int iEdge, Path *path);
+Path TwoColorsPath(int v, int color1, int color2, EdgeList edge_list, Table table);
+short EndsInW(int w, Path path, EdgeList edge_list);
 
 void CreateTableCell(TableCell *tcell);
 void CreateTable(Table *table, int nvertices, int ncolors);
