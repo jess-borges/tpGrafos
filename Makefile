@@ -2,7 +2,7 @@
 CC=gcc
 CFLAGS=-W -Wall -ansi -pedantic
 EXEC=grafo
-OBJ=grafo.o io.o main.o
+OBJ=grafo.o io.o coloracao.o main.o
 all: $(EXEC)
 grafo: $(OBJ)
 	$(CC) -o $@ $^ 

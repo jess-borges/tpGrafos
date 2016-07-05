@@ -1,19 +1,25 @@
 #include "grafo.h"
-
+#include "io.h"
 
 /****************** Operações de Free e FreeList ******************/
-void CreateFree(Free *f){
+void CreateFree(Free *f, int v, int delta, Table *table){
+    int c; 
+
     f->first = (Pointer) malloc(sizeof(FreeCell));
     f->last = f->first;
     f->first->next = NULL;
+
+    for (c = 0; c < (delta + 1); c++){
+        InsertFreeIntern(c, f, &table->matrix[v][c]);
+    }
 }
 
-void CreateFreeList(FreeList *fl, int nvertices){
-    int i; 
+void CreateFreeList(FreeList *fl, int nvertices, int delta, Table *table){
+    int v; 
     fl->size = nvertices;
     fl->f = (Free *) malloc (fl->size*sizeof(Free));
-    for (i = 0; i < fl->size; i++){
-        CreateFree(&fl->f[i]);
+    for (v = 0; v < fl->size; v++){
+        CreateFree(&fl->f[v], v, delta, table);
     }
 }
 
@@ -43,6 +49,7 @@ short RemoveFreeIntern(Free *f, int *color, Pointer p, TableCell *tcell){
     }
     nextP = p->next;
     *color = nextP->color;
+    printf(" --color = %d-- ", *color)
     p->next = nextP->next;
     if (p->next == NULL)
         f->last = p;
@@ -57,13 +64,19 @@ short RemoveFree(FreeList *fl, int v, int *color, Pointer p, TableCell *tcell){
     return RemoveFreeIntern(&fl->f[v], color, p, tcell);
 }
 
-int RemoveFreeByColor(FreeList *fl, int v, int color, Table *table){
+short RemoveFreeByColor(FreeList *fl, int v, int color, Table *table){
     TableCell *tcell;
 
     if (IsFreeColor(v, color, *fl)){
         tcell = &table->matrix[v][color];
         RemoveFreeIntern(&fl->f[v], &color, tcell->cPointer, tcell);
+        
+        printf("\nRemoveFree(%d, %d):", v, color); /* apagar*/
+        printFreeList(*fl); /* apagar */
+        
+        return TRUE;
     }
+    return FALSE;
 }
 
 short IsFreeColor(int v, int color, FreeList free_list){
@@ -155,15 +168,16 @@ int GetIndexOfEdge(int v, int w, EdgeList elist){
             return i;
         }
     }
-    return -1;
+    return NULO;
 }
 
+/*
 Edge GetEdge(int v, int w, EdgeList elist){
     int index;
     index = GetIndexOfEdge(v, w, elist);
     return elist.edge[index];
 }
-
+*/
 int GetOtherVertex(int v, Edge edge){
     if (edge.v == v)
         return edge.w;
@@ -172,20 +186,20 @@ int GetOtherVertex(int v, Edge edge){
 }
 
 int GetColorOfEdge(int v, int w, EdgeList elist){
-    Edge edge;
-    edge = GetEdge(v, w, elist);
-    if (edge != NULL)
-        return edge.color;
+    int iEdge;
+    iEdge = GetIndexOfEdge(v, w, elist);
+    if (iEdge != NULO)
+        return elist.edge[iEdge].color;
     else
-        return -1;
+        return NULO;
 }
-
+/*
 Edge GetColorlessEdge(EdgeList elist){
     int index; 
     index = GetIndexOfColorlessEdge(elist);
-    return elist.edge(index);
+    return elist.edge[index];
 }
-
+*/
 int GetIndexOfColorlessEdge(EdgeList elist){
     int i; 
     for (i = 0; i < elist.size; i++){
@@ -196,8 +210,8 @@ int GetIndexOfColorlessEdge(EdgeList elist){
     return NULO;
 }
 
-Edge IsTottalyColored(EdgeList elist){
-    return (GetColorlessEdge(elist) == NULL);
+short IsTottalyColored(EdgeList elist){
+    return (GetIndexOfColorlessEdge(elist) == NULO);
 }
 
 void coloringEdge(int color, int iEdge, EdgeList *edge_list, FreeList *free_list, Table *table){
@@ -232,11 +246,10 @@ Path TwoColorsPath(int v, int color1, int color2, EdgeList edge_list, Table tabl
     Path path;
     short endOfPath;
 
-    path = NULL;
     endOfPath = FALSE;
     iEdge = table.matrix[v][color2].adj;
-    edge = edge_list.edge[iEdge];
-    if (edge != NULL){
+    if (iEdge != NULO){
+        edge = edge_list.edge[iEdge];
         AddEdgeToPath(iEdge, &path);
         v = GetOtherVertex(v, edge);
     }
@@ -260,11 +273,12 @@ Path TwoColorsPath(int v, int color1, int color2, EdgeList edge_list, Table tabl
             endOfPath = TRUE;
         }
     }
+    return path;
 }
 
 short EndsInW(int w, Path path, EdgeList edge_list){
     int vertex, iEdge;
-    iEdge = path.iEdges[size - 1];
+    iEdge = path.iEdges[path.size - 1];
     vertex = edge_list.edge[iEdge].w;
     return (vertex == w);
 }
@@ -279,22 +293,22 @@ void InvertPathColors(int color1, int color2, Path path, FreeList *free_list, Ed
     }
 
     /* Garante que as cores possam ser enviadas por parametro em qualquer ordem */
-    edge = edge_list.edge[path.iEdges[0]];
+    edge = edge_list->edge[path.iEdges[0]];
     if (color1 != edge.color){
         color = color1;
         color1 = edge.color;
         color2 = color;
     }
     if (path.size > 1){
-        edge = edge_list.edge[path.iEdges[1]];
+        edge = edge_list->edge[path.iEdges[1]];
         color2 = edge.color;
     }
 
     for (i = 0; i < path.size; i++){
-        edge = edge_list.edge[path.iEdges[i]];
+        edge = edge_list->edge[path.iEdges[i]];
         if (i%2 == 0){
             /* Atualiza no EdgeList */
-            edge_list.edge[path.iEdges[i]].color = color2;
+            edge_list->edge[path.iEdges[i]].color = color2;
             /* Atualiza no FreeList */
             RemoveFreeByColor(free_list, edge.v, color2, table);
             RemoveFreeByColor(free_list, edge.w, color2, table);
@@ -305,7 +319,7 @@ void InvertPathColors(int color1, int color2, Path path, FreeList *free_list, Ed
 
         }
         else{
-            edge_list.edge[path.iEdges[i]].color = color1;
+            edge_list->edge[path.iEdges[i]].color = color1;
             /* Atualiza no FreeList */
             RemoveFreeByColor(free_list, edge.v, color1, table);
             RemoveFreeByColor(free_list, edge.w, color1, table);
@@ -367,7 +381,7 @@ void CreateAdjMatrix(AdjMatrixGraph *graph, int nvertices){
 
 void InitWithAdjMatrix(AdjMatrixGraph *graph, EdgeList *edge_list, FreeList *free_list, Table *table){
     int i, j;
-    CreateFreeList(free_list, graph->n);
+    
     CreateEdgeList(edge_list, graph->m);
     for (i = 0; i < graph->n; i++){
         for (j = 0; j < i; j++){ 
@@ -386,4 +400,5 @@ void InitWithAdjMatrix(AdjMatrixGraph *graph, EdgeList *edge_list, FreeList *fre
             table->matrix[i][j].cPointer = NULL;
         }
     }
+    CreateFreeList(free_list, graph->n, graph->delta, table);
 }

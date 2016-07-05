@@ -84,14 +84,14 @@ typedef struct {
 } AdjMatrixGraph;
 
 /****************** Operações de Free e FreeList ******************/
-void CreateFree(Free *f);
-void CreateFreeList(FreeList *fl, int nvertices);
+void CreateFree(Free *f, int v, int delta, Table *table);
+void CreateFreeList(FreeList *fl, int nvertices, int delta, Table *table);
 short IsEmpty(Free f);
 void InsertFreeIntern(int color, Free *f, TableCell *tcell);
 void InsertFree(int v, int color, FreeList *fl, Table *table);
 short RemoveFreeIntern(Free *f, int *color, Pointer p, TableCell *tcell);
 short RemoveFree(FreeList *fl, int v, int *color, Pointer p, TableCell *tcell);
-int RemoveFreeByColor(FreeList *fl, int v, int color, Table *table);
+short RemoveFreeByColor(FreeList *fl, int v, int color, Table *table);
 short IsFreeColor(int v, int color, FreeList free_list);
 int GetCommonFreeColor(Edge edge, FreeList free_list);
 int GetFreeColor(int v, FreeList free_list);
@@ -102,12 +102,12 @@ int GetFreeColorNotTaboo(int v, FreeList free_list, int taboo);
 void CreateEdgeList(EdgeList *elist, int nedges);
 void AddEdge(int v, int w, int color, EdgeList *elist);
 int GetIndexOfEdge(int v, int w, EdgeList elist);
-Edge GetEdge(int v, int w, EdgeList elist);
+/*Edge GetEdge(int v, int w, EdgeList elist);*/
 int GetOtherVertex(int v, Edge edge);
 int GetIndexOfColorlessEdge(EdgeList elist);
 int GetColorOfEdge(int v, int w, EdgeList elist);
-Edge GetColorlessEdge(EdgeList elist);
-Edge IsTottalyColored(EdgeList elist);
+/*Edge GetColorlessEdge(EdgeList elist);*/
+short IsTottalyColored(EdgeList elist);
 void coloringEdge(int color, int iEdge, EdgeList *edge_list, FreeList *free_list, Table *table);
 
 /****************** Operações de Path ******************/

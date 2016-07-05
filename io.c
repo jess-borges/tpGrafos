@@ -63,30 +63,47 @@ void printAdjMatrixGraph(AdjMatrixGraph graph){
     }
 }
 
-void printGraph(EdgeList edge_list, FreeList free_list, Table table){
-    int i, j;
-    Pointer p;
+void printEdgeList(EdgeList edge_list){
+    int i;
+
     printf("\nEdge List: ");
     for (i = 0; i < edge_list.size; i++){
         printf("\n(%d, %d): %d", edge_list.edge[i].v, edge_list.edge[i].w, edge_list.edge[i].color);
     }
+}
+
+void printFreeList(FreeList free_list){
+    int i;
+    Pointer p; 
 
     printf("\nFree List: ");
     for (i = 0; i < free_list.size; i++){
         printf("\nVertex %d: ", i);
         if (!IsEmpty(free_list.f[i])){
-            p = free_list.f[i].first;
-            while (p != free_list.f[i].last){
+            p = free_list.f[i].first->next;
+            while (p != NULL){
                 printf("%d ", p->color);
                 p = p->next;
             }
         }
     }
+}
 
+void printTable(Table table){
+    int i, j;
     printf("\nTable (%d, %d):", table.sizeX, table.sizeY);
     for (i = 0; i < table.sizeX; i++){
         for (j = 0; j < table.sizeY; j++){
-            printf("\n(v = %d, c = %d) status = %d | adj = %d", i, j, table.matrix[i][j].status, table.matrix[i][j].adj);
+            printf("\n(v = %d, c = %d) status = %d | adj = %d | c = %d", i, j, table.matrix[i][j].status, table.matrix[i][j].adj, table.matrix[i][j].cPointer->next->color);
         }
-    }    
+    } 
+}
+
+void printGraph(EdgeList edge_list, FreeList free_list, Table table){
+    
+    printEdgeList(edge_list);
+
+    printFreeList(free_list);
+
+    printTable(table);   
 }
